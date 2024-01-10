@@ -1,0 +1,31 @@
+{% extends 'base.html '%}
+
+{% block content %}
+
+<div class="col-12">
+    <form method="post" enctype="multipart/form-data">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3>
+                            Подтверждение почты
+                        </h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                    <input type="text" name="code" placeholder="код подтверждения" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+                    </div>
+
+                    <button type="submit" class="btn btn-outline-primary form-control m-2">
+                        Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
