@@ -31,7 +31,7 @@
                     {% endif %}
                 </ul>
                 <a href="{% url 'catalog:product' object.pk %}" type="button" class="btn btn-sm btn-block btn-outline-primary">Подробнее</a>
-                {% if user.is_authenticated %}
+                {% if perms.catalog.change_product or user == object.owner %}
                     <a href="{% url 'catalog:edit' object.pk %}" type="button" class="btn btn-sm btn-info">Изменить</a>
                 {% endif %}
                 {% if user.is_authenticated %}

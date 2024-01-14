@@ -149,9 +149,4 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 'erkekb07@yandex.ru'
 EMAIL_HOST_PASSWORD = 'wmipyxbdjqmgwpdo'
 
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_USE_SSL = False
-# EMAIL_HOST_USER = 'your@gmail.com'
-# EMAIL_HOST_PASSWORD = 'app_password'
+LOGIN_URL = '/users/'

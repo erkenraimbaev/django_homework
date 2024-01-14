@@ -1,5 +1,7 @@
-from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.forms import inlineformset_factory
+from django.http import Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
@@ -40,10 +42,21 @@ class ProductDetailView(DetailView):
         return context_data
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin,UserPassesTestMixin, PermissionRequiredMixin, UpdateView):
     model = Product
     form_class = ProductForm
+    permission_required = 'catalog.change_product'
     success_url = reverse_lazy('catalog:home')
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if self.request.user == self.object.owner or self.request.user.is_staff:
+            return self.object
+        raise Http404
+
+    def get_form_class(self):
+        if self.request.user == self.object.owner or self.request.user.is_staff:
+            return ProductForm
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -62,21 +75,26 @@ class ProductUpdateView(UpdateView):
             formset.save()
         return super().form_valid(form)
 
+    def test_func(self):
+        return self.request.user.is_staff and self.get_object().owner == self.request.user
 
-class ProductDeleteView(DeleteView):
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
 
 
-class ContactsView(TemplateView):
+@login_required
+def post(request, *args, **kwargs):
+    name = request.POST.get('name')
+    phone_number = request.POST.get('phone')
+    message = request.POST.get('message')
+    print(f'Имя: {name}\nНомер телефона: {phone_number}\nСообщение: {message}')
+    return redirect(reverse('catalog:contacts'))
+
+
+class ContactsView(LoginRequiredMixin, TemplateView):
     template_name = 'catalog/contacts.html'
     extra_context = {
         'title': 'Контакты'
     }
-
-    def post(self, request, *args, **kwargs):
-        name = request.POST.get('name')
-        phone_number = request.POST.get('phone')
-        message = request.POST.get('message')
-        print(f'Имя: {name}\nНомер телефона: {phone_number}\nСообщение: {message}')
-        return redirect(reverse('catalog:contacts'))
