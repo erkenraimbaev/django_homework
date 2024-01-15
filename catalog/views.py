@@ -42,10 +42,10 @@ class ProductDetailView(DetailView):
         return context_data
 
 
-class ProductUpdateView(LoginRequiredMixin,UserPassesTestMixin, PermissionRequiredMixin, UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Product
     form_class = ProductForm
-    permission_required = 'catalog.change_product'
+    # permission_required = 'catalog.change_product'
     success_url = reverse_lazy('catalog:home')
 
     def get_object(self, queryset=None):
@@ -53,10 +53,6 @@ class ProductUpdateView(LoginRequiredMixin,UserPassesTestMixin, PermissionRequir
         if self.request.user == self.object.owner or self.request.user.is_staff:
             return self.object
         raise Http404
-
-    def get_form_class(self):
-        if self.request.user == self.object.owner or self.request.user.is_staff:
-            return ProductForm
 
     def get_context_data(self, **kwargs):
         context_data = super().get_context_data(**kwargs)
@@ -76,12 +72,14 @@ class ProductUpdateView(LoginRequiredMixin,UserPassesTestMixin, PermissionRequir
         return super().form_valid(form)
 
     def test_func(self):
-        return self.request.user.is_staff and self.get_object().owner == self.request.user
+        return self.get_object().owner == self.request.user or self.request.user.is_superuser \
+            or self.request.user.has_perms(['catalog.change_product'])
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
+    permission_required = "catalog.delete_product"
 
 
 @login_required
