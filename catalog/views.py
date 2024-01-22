@@ -7,7 +7,8 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
 
 from catalog.forms import ProductForm, VersionForm
-from catalog.models import Product, Version
+from catalog.models import Product, Version, Category
+from catalog.services import get_cached_category
 from catalog.utils import set_product_version
 
 
@@ -96,3 +97,13 @@ class ContactsView(LoginRequiredMixin, TemplateView):
     extra_context = {
         'title': 'Контакты'
     }
+
+
+class CategoryListView(ListView):
+    model = Category
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['title'] = 'Категории Товаров'
+        context_data['object_list'] = get_cached_category()
+        return context_data
